@@ -7,6 +7,7 @@
 // ----------------------------------------------------------------
 
 #pragma once
+#include <vector>
 #include <SDL2/SDL.h>
 
 // Vector2 struct just stores x/y coordinates
@@ -15,6 +16,13 @@ struct Vector2
 {
 	float x;
 	float y;
+};
+
+// Represents a ball instance
+struct Ball
+{
+    Vector2 pos; // position
+    Vector2 vel; // velocity
 };
 
 // Game class
@@ -48,8 +56,6 @@ private:
 	int mPaddleDir[2]; // 0 = player 1, 1 = player 2
 	// Position of paddle
 	Vector2 mPaddlePos[2]; // 0 = player 1, 1 = player 2
-	// Position of ball
-	Vector2 mBallPos;
-	// Velocity of ball
-	Vector2 mBallVel;
+    // Ball instances
+    std::vector<Ball> mBalls;
 };
