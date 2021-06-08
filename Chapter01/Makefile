@@ -22,6 +22,9 @@ $(BUILDDIR):
 $(BUILDDIR)/%.o: %.cpp $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@ $(INCDIRS)
 
+run: $(TARGET)
+	./$(TARGET)
+
 clean:
 	rm -f $(BUILDDIR) $(TARGET)
 
