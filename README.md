@@ -5,6 +5,11 @@ The source code for the chapters is released under the BSD 3-clause
 license. See LICENSE for more detail. Note that this license does not apply to
 the code in the External directory. Each External project is licensed separately.
 
+# William (BJ) Blair Changes
+I'm following the book on Linux (Ubuntu 20.04, gcc 9.3) using Makefiles. Assumes SDL2
+is installed (sudo apt-get install libsdl2-dev). Simply type 'make' in the chapter
+directory to build.
+
 # Building the Code
 Each chapter's code is tested and works on both Microsoft Windows and Apple macOS.
 
