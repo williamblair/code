@@ -9,11 +9,13 @@
 #include "Game.h"
 #include <SDL2/SDL_image.h>
 #include <algorithm>
+#include <cstdlib>
 #include "Actor.h"
 #include "SpriteComponent.h"
 #include "Ship.h"
 #include "Character.h"
 #include "BGSpriteComponent.h"
+#include "TileMap.h"
 
 Game::Game()
 :mWindow(nullptr)
@@ -186,6 +188,17 @@ void Game::LoadData()
 	};
 	bg->SetBGTextures(bgtexs);
 	bg->SetScrollSpeed(-200.0f);
+
+    // test tilemap
+    mTileMaps[0] = new TileMap(this);
+    mTileMaps[1] = new TileMap(this);
+    mTileMaps[2] = new TileMap(this);
+    if (!mTileMaps[0]->Load("Assets/MapLayer1.csv", 70) || // nearest bg
+        !mTileMaps[1]->Load("Assets/MapLayer2.csv", 60) ||
+        !mTileMaps[2]->Load("Assets/MapLayer3.csv", 50)) // farthest bg
+    {
+        exit(EXIT_FAILURE);
+    }
 }
 
 void Game::UnloadData()

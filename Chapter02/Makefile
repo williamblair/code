@@ -16,7 +16,9 @@ OBJS = $(BUILDDIR)/Main.o \
        $(BUILDDIR)/Math.o \
        $(BUILDDIR)/Ship.o \
        $(BUILDDIR)/SpriteComponent.o \
-       $(BUILDDIR)/Character.o 
+       $(BUILDDIR)/Character.o \
+       $(BUILDDIR)/TileMapComponent.o \
+       $(BUILDDIR)/TileMap.o
 LIBDIRS = 
 INCDIRS =
 LIBS = `pkg-config --libs sdl2` \

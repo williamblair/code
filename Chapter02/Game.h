@@ -55,4 +55,5 @@ private:
 	// Game-specific
 	class Ship* mShip; // Player's ship
     class Character* mCharacter; // test sprite with multiple animations (exercise 2.2)
+    class TileMap* mTileMaps[3]; // test tilemap (exercise 2.3)
 };
