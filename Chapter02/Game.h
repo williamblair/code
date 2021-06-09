@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------
 
 #pragma once
-#include "SDL/SDL.h"
+#include <SDL2/SDL.h>
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -54,4 +54,5 @@ private:
 
 	// Game-specific
 	class Ship* mShip; // Player's ship
+    class Character* mCharacter; // test sprite with multiple animations (exercise 2.2)
 };
