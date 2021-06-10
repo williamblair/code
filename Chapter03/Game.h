@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------
 
 #pragma once
-#include "SDL/SDL.h"
+#include <SDL2/SDL.h>
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -25,6 +25,11 @@ public:
 
 	void AddSprite(class SpriteComponent* sprite);
 	void RemoveSprite(class SpriteComponent* sprite);
+
+    // called by the ship after it is destroyed so we respawn after
+    void StartPlayerRespawnTimer(const float delaySeconds) {
+        mRespawnTimer = delaySeconds;
+    }
 	
 	SDL_Texture* GetTexture(const std::string& fileName);
 
@@ -60,4 +65,5 @@ private:
 	// Game-specific
 	class Ship* mShip; // Player's ship
 	std::vector<class Asteroid*> mAsteroids;
+    float mRespawnTimer; // player respawn time delay
 };

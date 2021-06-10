@@ -7,7 +7,9 @@
 // ----------------------------------------------------------------
 
 #include "Game.h"
-#include "SDL/SDL_image.h"
+#include <SDL2/SDL_image.h>
+#include <cassert>
+#include <cstdio>
 #include <algorithm>
 #include "Actor.h"
 #include "SpriteComponent.h"
@@ -20,6 +22,7 @@ Game::Game()
 ,mRenderer(nullptr)
 ,mIsRunning(true)
 ,mUpdatingActors(false)
+,mRespawnTimer(0.0f)
 {
 	
 }
@@ -140,8 +143,27 @@ void Game::UpdateGame()
 	// Delete dead actors (which removes them from mActors)
 	for (auto actor : deadActors)
 	{
+        if (actor == mShip)
+        {
+            mShip = nullptr;
+        }
 		delete actor;
 	}
+
+    // Countdown and respawn player, if applicable
+    if (mRespawnTimer > 0.0f)
+    {
+        mRespawnTimer -= deltaTime;
+        if (mRespawnTimer <= 0.0f)
+        {
+            mRespawnTimer = 0.0f;
+	        // Create player's ship
+            assert(mShip == nullptr);
+        	mShip = new Ship(this);
+        	mShip->SetPosition(Vector2(512.0f, 384.0f));
+        	mShip->SetRotation(Math::PiOver2);
+        }
+    }
 }
 
 void Game::GenerateOutput()
@@ -166,7 +188,7 @@ void Game::LoadData()
 	mShip->SetRotation(Math::PiOver2);
 
 	// Create asteroids
-	const int numAsteroids = 20;
+	const int numAsteroids = 10;
 	for (int i = 0; i < numAsteroids; i++)
 	{
 		new Asteroid(this);
