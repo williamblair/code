@@ -22,8 +22,9 @@ Laser::Laser(Game* game)
 	sc->SetTexture(game->GetTexture("Assets/Laser.png"));
 
 	// Create a move component, and set a forward speed
-	MoveComponent* mc = new MoveComponent(this);
-	mc->SetForwardSpeed(800.0f);
+	mMove = new MoveComponent(this);
+	//mMove->SetForwardSpeed(800.0f);
+    mSpeed = 1000000.0f;
 
 	// Create a circle component (for collision)
 	mCircle = new CircleComponent(this);
@@ -32,6 +33,9 @@ Laser::Laser(Game* game)
 
 void Laser::UpdateActor(float deltaTime)
 {
+    // apply movement impulse
+    mMove->AddForce(GetForward() * mSpeed);
+
 	// If we run out of time, laser is dead
 	mDeathTimer -= deltaTime;
 	if (mDeathTimer <= 0.0f)

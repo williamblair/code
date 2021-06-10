@@ -31,7 +31,7 @@ void InputComponent::ProcessInput(const uint8_t* keyState)
 	{
 		forwardSpeed -= mMaxForwardSpeed;
 	}
-	SetForwardSpeed(forwardSpeed);
+    AddForce(mOwner->GetForward() * forwardSpeed);
 
 	// Calculate angular speed for MoveComponent
 	float angularSpeed = 0.0f;
@@ -43,5 +43,5 @@ void InputComponent::ProcessInput(const uint8_t* keyState)
 	{
 		angularSpeed -= mMaxAngularSpeed;
 	}
-	SetAngularSpeed(angularSpeed);
+    SetAngularSpeed(angularSpeed);
 }
