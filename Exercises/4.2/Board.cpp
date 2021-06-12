@@ -8,6 +8,10 @@
 
 #include "Board.h"
 #include "Random.h"
+#include "AlphaBeta.h"
+#include <SDL2/SDL_log.h>
+#include <cstdio>
+#include <cstdlib>
 
 BoardState::BoardState()
 {
@@ -97,6 +101,7 @@ bool BoardState::IsFull() const
 int BoardState::GetFourInARow() const
 {
 	// Returns -1 if yellow wins, 1 if red wins, 0 otherwise
+    // This matches the AlphaBeta implementation of Max=Red (AI), Min=Yellow (Human)
 
 	// Check if there's a row with four in a row
 	for (int row = 0; row < 6; row++)
@@ -208,16 +213,26 @@ bool TryPlayerMove(BoardState* state, int column)
 
 void CPUMove(BoardState* state)
 {
-	// For now, this just randomly picks one of the possible moves
-	std::vector<BoardState*> moves = state->GetPossibleMoves(BoardState::Red);
+    const BoardState* choice = AlphaBetaDecide(state, 10); // max depth of 10
+    if (choice == nullptr)
+    {
+        SDL_LogWarn(0, "AlphaBetaDecide returned null, choosing randomly\n");
+	
+        std::vector<BoardState*> moves = state->GetPossibleMoves(BoardState::Red);
+	    int index = Random::GetIntRange(0, moves.size() - 1);
 
-	int index = Random::GetIntRange(0, moves.size() - 1);
+	    *state = *moves[index];
 
-	*state = *moves[index];
-
-	// Clear up memory from possible moves
-	for (auto state : moves)
-	{
-		delete state;
-	}
+	    // Clear up memory from possible moves
+    	for (auto state : moves)
+    	{
+    		delete state;
+    	}
+    }
+    else
+    {
+        *state = *choice;
+        delete choice; // this memory wasn't freed in AlphaBetaDecide
+    }
 }
+

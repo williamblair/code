@@ -15,3 +15,5 @@ External/FMOD
 */main
 
 *.swp
+*/*/build
+*/*/main
