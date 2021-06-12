@@ -69,3 +69,49 @@ public:
 	const char* GetName() const override
 	{ return "Attack"; }
 };
+
+// Each update, checks if enemy is nearby and switches to it; else rotates
+class TowerSearchForEnemy : public AIState
+{
+public:
+	TowerSearchForEnemy(class AIComponent* owner, const float attackRange)
+		:AIState(owner)
+        ,AttackRange(attackRange)
+	{ }
+
+	void Update(float deltaTime) override;
+	void OnEnter() override;
+	void OnExit() override;
+
+	const char* GetName() const override
+	{ return "TowerSearchForEnemy"; }
+private:
+	const float AttackRange;
+};
+
+// Each update, checks for nearby enemy and attacks if cooldown is valid;
+// if no enemy found switch to searching state
+class TowerAttackEnemy : public AIState
+{
+public:
+	TowerAttackEnemy(class AIComponent* owner,
+                     const float attackRange,
+                     const float attackTime)
+		:AIState(owner)
+        ,mNextAttack(0.0f) // be able to fire immediately
+        ,AttackRange(attackRange)
+        ,AttackTime(attackTime)
+	{ }
+
+	void Update(float deltaTime) override;
+	void OnEnter() override;
+	void OnExit() override;
+
+	const char* GetName() const override
+	{ return "TowerAttackEnemy"; }
+private:
+	float mNextAttack;
+	const float AttackRange;
+	const float AttackTime;
+};
+

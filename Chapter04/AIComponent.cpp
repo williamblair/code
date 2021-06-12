@@ -9,7 +9,7 @@
 #include "AIComponent.h"
 #include "Actor.h"
 #include "AIState.h"
-#include <SDL/SDL_log.h>
+#include <SDL2/SDL_log.h>
 
 AIComponent::AIComponent(class Actor* owner)
 :Component(owner)

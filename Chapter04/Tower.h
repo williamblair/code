@@ -16,7 +16,8 @@ public:
 	void UpdateActor(float deltaTime) override;
 private:
 	class MoveComponent* mMove;
-	float mNextAttack;
-	const float AttackTime = 2.5f;
-	const float AttackRange = 100.0f;
+    class AIComponent* mAi;
+    const float AttackRange = 100.0f;
+    const float AttackTime = 2.5f;
 };
+

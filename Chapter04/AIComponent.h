@@ -21,6 +21,8 @@ public:
 	
 	// Add a new state to the map
 	void RegisterState(class AIState* state);
+
+    Actor* GetOwner() const { return mOwner; }
 private:
 	// Maps name of state to AIState instance
 	std::unordered_map<std::string, class AIState*> mStateMap;
