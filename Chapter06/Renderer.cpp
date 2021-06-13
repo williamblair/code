@@ -19,7 +19,6 @@
 Renderer::Renderer(Game* game)
 	:mGame(game)
 	,mSpriteShader(nullptr)
-	,mMeshShader(nullptr)
 {
 }
 
@@ -90,8 +89,13 @@ void Renderer::Shutdown()
 	delete mSpriteVerts;
 	mSpriteShader->Unload();
 	delete mSpriteShader;
-	mMeshShader->Unload();
-	delete mMeshShader;
+	//mMeshShader->Unload();
+	//delete mMeshShader;
+    for (auto s = mMeshShaders.begin(); s != mMeshShaders.end(); ++s)
+    {
+        s->second->Unload();
+        delete s->second;
+    }
 	SDL_GL_DeleteContext(mContext);
 	SDL_DestroyWindow(mWindow);
 }
@@ -126,6 +130,39 @@ void Renderer::Draw()
 	// Enable depth buffering/disable alpha blend
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
+
+    // Iterate through each mesh component shader group
+    for (auto meshCompIt = mMeshCompMap.begin();
+         meshCompIt != mMeshCompMap.end();
+         ++meshCompIt)
+    {
+        // find the shader based on the mesh component shader name string
+        auto shaderIt = mMeshShaders.find(meshCompIt->first);
+        if (shaderIt != mMeshShaders.end())
+        {
+            Shader* shader = shaderIt->second;
+
+            // Set the mesh shader active
+            shader->SetActive();
+
+            // Update view-projection matrix
+            shader->SetMatrixUniform("uViewProj", mView * mProjection);
+            // Update lighting uniforms
+            SetLightUniforms(shader);
+
+            // Draw mesh components that use this shader
+            for (MeshComponent* meshComp : meshCompIt->second)
+            {
+                meshComp->Draw(shader);
+            }
+        }
+        else
+        {
+            SDL_LogWarn(0, "Renderer failed to find shader with name %s\n",
+                        meshCompIt->first.c_str());
+        }
+    }
+#if 0
 	// Set the mesh shader active
 	mMeshShader->SetActive();
 	// Update view-projection matrix
@@ -136,6 +173,7 @@ void Renderer::Draw()
 	{
 		mc->Draw(mMeshShader);
 	}
+#endif
 
 	// Draw all sprite components
 	// Disable depth buffering
@@ -185,13 +223,30 @@ void Renderer::RemoveSprite(SpriteComponent* sprite)
 
 void Renderer::AddMeshComp(MeshComponent* mesh)
 {
-	mMeshComps.emplace_back(mesh);
+	//mMeshComps.emplace_back(mesh);
+    std::string shaderName = mesh->GetMesh()->GetShaderName();
+    mMeshCompMap[shaderName].push_back(mesh);
 }
 
 void Renderer::RemoveMeshComp(MeshComponent* mesh)
 {
-	auto iter = std::find(mMeshComps.begin(), mMeshComps.end(), mesh);
-	mMeshComps.erase(iter);
+//auto iter = std::find(mMeshComps.begin(), mMeshComps.end(), mesh);
+//	mMeshComps.erase(iter);
+    for (auto mapIter = mMeshCompMap.begin();
+         mapIter != mMeshCompMap.end();
+        ++mapIter)
+    {
+        auto meshIter = std::find(mapIter->second.begin(),
+                                  mapIter->second.end(),
+                                  mesh);
+        if (meshIter != mapIter->second.end())
+        {
+            mapIter->second.erase(meshIter);
+            return; // no need to keep looking
+        }
+    }
+
+    SDL_LogWarn(0, "RemoveMeshComp failed to find mesh\n");
 }
 
 Texture* Renderer::GetTexture(const std::string& fileName)
@@ -232,6 +287,41 @@ Mesh* Renderer::GetMesh(const std::string & fileName)
 		if (m->Load(fileName, this))
 		{
 			mMeshes.emplace(fileName, m);
+
+            // Load the associated shader if it isn't already
+            if (mMeshShaders.find(m->GetShaderName()) == mMeshShaders.end())
+            {
+                // Create the vertex and fragment shader file paths
+                std::string shaderName = "Shaders/";
+                shaderName += m->GetShaderName();
+                std::string vertShaderFile = shaderName + ".vert";
+                std::string fragShaderFile = shaderName + ".frag";
+            
+                // Create new shader object
+                Shader* shader = new Shader();
+                if (!shader->Load(vertShaderFile, fragShaderFile))
+                {
+                    SDL_LogError(0, "Failed to load shaders: %s, %s\n",
+                                 vertShaderFile.c_str(), fragShaderFile.c_str());
+                    delete shader;
+                    delete m;
+                    mMeshes.erase(mMeshes.find(fileName));
+                    m = nullptr;
+                }
+                else
+                {
+                    shader->SetActive();
+                    
+                    // Set the view-projection matrix
+                    mView = Matrix4::CreateLookAt(Vector3::Zero, Vector3::UnitX, Vector3::UnitZ);
+                    mProjection = Matrix4::CreatePerspectiveFOV(Math::ToRadians(70.0f),
+                        mScreenWidth, mScreenHeight, 25.0f, 10000.0f);
+                    shader->SetMatrixUniform("uViewProj", mView * mProjection);
+
+                    // add to shader map
+                    mMeshShaders[m->GetShaderName()] = shader;
+                }
+            }
 		}
 		else
 		{
@@ -256,19 +346,20 @@ bool Renderer::LoadShaders()
 	Matrix4 viewProj = Matrix4::CreateSimpleViewProj(mScreenWidth, mScreenHeight);
 	mSpriteShader->SetMatrixUniform("uViewProj", viewProj);
 
+#if 0
 	// Create basic mesh shader
 	mMeshShader = new Shader();
 	if (!mMeshShader->Load("Shaders/Phong.vert", "Shaders/Phong.frag"))
 	{
 		return false;
 	}
-
 	mMeshShader->SetActive();
 	// Set the view-projection matrix
 	mView = Matrix4::CreateLookAt(Vector3::Zero, Vector3::UnitX, Vector3::UnitZ);
 	mProjection = Matrix4::CreatePerspectiveFOV(Math::ToRadians(70.0f),
 		mScreenWidth, mScreenHeight, 25.0f, 10000.0f);
 	mMeshShader->SetMatrixUniform("uViewProj", mView * mProjection);
+#endif
 	return true;
 }
 
