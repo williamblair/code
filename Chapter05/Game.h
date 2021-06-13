@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------
 
 #pragma once
-#include "SDL/SDL.h"
+#include "SDL2/SDL.h"
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -68,4 +68,12 @@ private:
 	// Game-specific
 	class Ship* mShip;
 	std::vector<class Asteroid*> mAsteroids;
+
+    // background color
+    std::vector<Vector3> mBgColors;
+    Vector3 mCurBgColor;
+    const float mBgColorTime = 4.0f; // 1 second for each color
+    float mBgColorTimer; // count time until color change
+    int mCurBgIndex;
 };
+

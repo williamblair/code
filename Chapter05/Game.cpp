@@ -88,6 +88,14 @@ bool Game::Initialize()
 	LoadData();
 
 	mTicksCount = SDL_GetTicks();
+
+    mBgColors = {
+        Vector3(1.0f, 0.0f, 0.0f), // red
+        Vector3(0.0f, 1.0f, 0.0f), // green
+        Vector3(0.0f, 0.0f, 1.0f) // blue
+    };
+    mCurBgIndex = 0;
+    mBgColorTimer = 0.0f;
 	
 	return true;
 }
@@ -174,12 +182,24 @@ void Game::UpdateGame()
 	{
 		delete actor;
 	}
+
+    // Update BG color
+    mBgColorTimer += deltaTime;
+    if (mBgColorTimer >= mBgColorTime)
+    {
+        mBgColorTimer -= mBgColorTime;
+        mCurBgIndex = (mCurBgIndex + 1) % mBgColors.size();
+    }
+    mCurBgColor = Vector3::Lerp(mBgColors[mCurBgIndex],
+                                mBgColors[(mCurBgIndex + 1) % mBgColors.size()],
+                                mBgColorTimer / mBgColorTime);
 }
 
 void Game::GenerateOutput()
 {
 	// Set the clear color to grey
-	glClearColor(0.86f, 0.86f, 0.86f, 1.0f);
+	//glClearColor(0.86f, 0.86f, 0.86f, 1.0f);
+	glClearColor(mCurBgColor.x, mCurBgColor.y, mCurBgColor.z, 1.0f);
 	// Clear the color buffer
 	glClear(GL_COLOR_BUFFER_BIT);
 	
