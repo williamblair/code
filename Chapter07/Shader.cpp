@@ -8,7 +8,7 @@
 
 #include "Shader.h"
 #include "Texture.h"
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include <fstream>
 #include <sstream>
 
