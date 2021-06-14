@@ -10,7 +10,8 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <SDL/SDL.h>
+#include <map>
+#include <SDL2/SDL.h>
 #include "Math.h"
 
 struct DirectionalLight
@@ -65,7 +66,10 @@ private:
 	std::vector<class SpriteComponent*> mSprites;
 
 	// All mesh components drawn
-	std::vector<class MeshComponent*> mMeshComps;
+	//std::vector<class MeshComponent*> mMeshComps;
+
+    // key = shader name
+    std::map<std::string, std::vector<class MeshComponent*>> mMeshCompMap;
 
 	// Game
 	class Game* mGame;
@@ -75,8 +79,9 @@ private:
 	// Sprite vertex array
 	class VertexArray* mSpriteVerts;
 
-	// Mesh shader
-	class Shader* mMeshShader;
+	// Mesh shaders
+	//class Shader* mMeshShader;
+    std::map<std::string, class Shader*> mMeshShaders;
 
 	// View/projection for 3D shaders
 	Matrix4 mView;

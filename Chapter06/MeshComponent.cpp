@@ -20,7 +20,8 @@ MeshComponent::MeshComponent(Actor* owner)
 	,mMesh(nullptr)
 	,mTextureIndex(0)
 {
-	mOwner->GetGame()->GetRenderer()->AddMeshComp(this);
+    // Moved to SetMesh() so we can use the mesh* in the renderer
+	//mOwner->GetGame()->GetRenderer()->AddMeshComp(this);
 }
 
 MeshComponent::~MeshComponent()
@@ -50,3 +51,10 @@ void MeshComponent::Draw(Shader* shader)
 		glDrawElements(GL_TRIANGLES, va->GetNumIndices(), GL_UNSIGNED_INT, nullptr);
 	}
 }
+
+void MeshComponent::SetMesh(class Mesh* mesh)
+{
+    mMesh = mesh;
+    mOwner->GetGame()->GetRenderer()->AddMeshComp(this);
+}
+

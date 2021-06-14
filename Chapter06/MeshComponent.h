@@ -17,8 +17,10 @@ public:
 	~MeshComponent();
 	// Draw this mesh component
 	virtual void Draw(class Shader* shader);
-	// Set the mesh/texture index used by mesh component
-	virtual void SetMesh(class Mesh* mesh) { mMesh = mesh; }
+	// Set the mesh/texture index used by mesh component and add
+    // this component to the renderer
+	virtual void SetMesh(class Mesh* mesh);
+    class Mesh* GetMesh() const { return mMesh; }
 	void SetTextureIndex(size_t index) { mTextureIndex = index; }
 protected:
 	class Mesh* mMesh;
