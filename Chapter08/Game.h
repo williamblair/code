@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------
 
 #pragma once
-#include "SDL/SDL.h"
+#include <SDL2/SDL.h>
 #include <unordered_map>
 #include <string>
 #include <vector>
