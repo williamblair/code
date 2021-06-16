@@ -123,6 +123,8 @@ void Game::ProcessInput()
 				mIsRunning = false;
 				break;
 			case SDL_MOUSEWHEEL:
+            case SDL_JOYDEVICEADDED:
+            case SDL_JOYDEVICEREMOVED:
 				mInputSystem->ProcessEvent(event);
 				break;
 			default:

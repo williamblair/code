@@ -248,6 +248,43 @@ void InputSystem::ProcessEvent(SDL_Event& event)
 			static_cast<float>(event.wheel.x),
 			static_cast<float>(event.wheel.y));
 		break;
+    case SDL_JOYDEVICEADDED:
+    {
+        int ctrl = event.jdevice.which;
+        SDL_Log("Joy device added: %d\n", ctrl);
+        if (mControllers[ctrl] != nullptr)
+        {
+            SDL_GameControllerClose(mControllers[ctrl]);
+            mControllers[ctrl] = nullptr;
+        }
+        mState.Controllers[ctrl].mIsConnected = false;
+        mControllers[ctrl] = SDL_GameControllerOpen(ctrl);
+        if (mControllers[ctrl] != nullptr)
+        {
+            mState.Controllers[ctrl].mIsConnected = true;
+            memset(mState.Controllers[ctrl].mCurrButtons, 0,
+                SDL_CONTROLLER_BUTTON_MAX);
+            memset(mState.Controllers[ctrl].mPrevButtons, 0,
+                SDL_CONTROLLER_BUTTON_MAX);
+        }
+        break;
+    }
+    case SDL_JOYDEVICEREMOVED:
+    {
+        int ctrl = event.jdevice.which;
+        SDL_Log("Joy device removed: %d\n", ctrl);
+        if (mControllers[ctrl] != nullptr)
+        {
+            SDL_GameControllerClose(mControllers[ctrl]);
+            mControllers[ctrl] = nullptr;
+            mState.Controllers[ctrl].mIsConnected = false;
+            memset(mState.Controllers[ctrl].mCurrButtons, 0,
+                SDL_CONTROLLER_BUTTON_MAX);
+            memset(mState.Controllers[ctrl].mPrevButtons, 0,
+                SDL_CONTROLLER_BUTTON_MAX);
+        }
+        break;
+    }
 	default:
 		break;
 	}
