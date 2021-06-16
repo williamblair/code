@@ -9,6 +9,7 @@
 #include "InputSystem.h"
 #include <SDL2/SDL.h>
 #include <cstring>
+#include <fstream>
 
 bool KeyboardState::GetKeyValue(SDL_Scancode keyCode) const
 {
@@ -296,6 +297,203 @@ void InputSystem::SetRelativeMouseMode(bool value)
 	SDL_SetRelativeMouseMode(set);
 
 	mState.Mouse.mIsRelative = value;
+}
+
+bool InputSystem::ParseMappingFile(const std::string& fileName)
+{
+    std::ifstream inFile(fileName);
+    if (!inFile.is_open())
+    {
+        SDL_LogError(0, "ParseMappingFile failed to open %s\n",
+                        fileName.c_str());
+        return false;
+    }
+
+    std::string curLine;
+    std::string action;
+    std::string device;
+    std::string button;
+    while (std::getline(inFile, curLine))
+    {
+        // skip empty or commented lines
+        if (curLine.size() == 0 ||
+            curLine[0] == '#')
+        {
+            continue;
+        }
+
+        int index = 0;
+        #define GetStr(res)                     \
+            res = "";                           \
+            while (index < curLine.size() &&    \
+                   curLine[index] != ',')       \
+            {                                   \
+                res += curLine[index++];        \
+            }                                   \
+            ++index; // skip , character
+
+        GetStr(action);
+        GetStr(device);
+        GetStr(button);
+
+        #undef GetStr
+        
+        if (action.size() == 0 ||
+            device.size() == 0 ||
+            button.size() == 0)
+        {
+            SDL_LogError(0, "ParseMappingFile failed to parse line: %s\n",
+                         curLine.c_str());
+        }
+
+        if (device == "Keyboard")
+        {
+            // Supported key presses for actions
+            std::map<std::string, SDL_Scancode> scancodeMap = {
+                { "A", SDL_SCANCODE_A },
+                { "Backspace", SDL_SCANCODE_BACKSPACE },
+                { "Control", SDL_SCANCODE_LCTRL }, // left control
+                { "D", SDL_SCANCODE_D },
+                { "Down", SDL_SCANCODE_DOWN },
+                { "Escape", SDL_SCANCODE_ESCAPE },
+                { "Left", SDL_SCANCODE_LEFT },
+                { "Return", SDL_SCANCODE_RETURN },
+                { "Right", SDL_SCANCODE_RIGHT },
+                { "S", SDL_SCANCODE_S },
+                { "Shift", SDL_SCANCODE_LSHIFT }, // left shift
+                { "Space", SDL_SCANCODE_SPACE },
+                { "Tab", SDL_SCANCODE_TAB },
+                { "Up", SDL_SCANCODE_UP },
+                { "W", SDL_SCANCODE_W }
+            };
+
+            auto mapIt = scancodeMap.find(button);
+            if (mapIt == scancodeMap.end())
+            {
+                SDL_LogError(0, "ParseMappingFile invalid key: %s\n", button.c_str());
+                return false;
+            }
+
+            // add the action name and key scancode to the map
+            mKeyboardActionMap[action] = mapIt->second;
+        }
+        else if (device == "Mouse")
+        {
+            // Support mouse button presses for actions
+            std::map<std::string, int> buttonMap = {
+                { "Left", SDL_BUTTON_LEFT },
+                { "Right", SDL_BUTTON_RIGHT },
+                { "Middle", SDL_BUTTON_MIDDLE },
+                { "X1", SDL_BUTTON_X1 },
+                { "X2", SDL_BUTTON_X2 }
+            }; 
+
+            auto mapIt = buttonMap.find(button);
+            if (mapIt == buttonMap.end())
+            {
+                SDL_LogError(0, "ParseMappingFile invalid mouse button: %s\n",
+                             button.c_str());
+                return false;
+            }
+
+            // add the action name and button num to the map
+            mMouseActionMap[action] = mapIt->second;
+        }
+        else if (device == "Controller")
+        {
+            // Supported controller buttons
+            std::map<std::string, SDL_GameControllerButton> buttonMap = {
+                { "A", SDL_CONTROLLER_BUTTON_A },
+                { "B", SDL_CONTROLLER_BUTTON_B },
+                { "X", SDL_CONTROLLER_BUTTON_X },
+                { "Y", SDL_CONTROLLER_BUTTON_Y },
+                { "Back", SDL_CONTROLLER_BUTTON_BACK },
+                { "Guide", SDL_CONTROLLER_BUTTON_GUIDE },
+                { "Start", SDL_CONTROLLER_BUTTON_START },
+                { "LeftStick", SDL_CONTROLLER_BUTTON_LEFTSTICK },
+                { "RightStick", SDL_CONTROLLER_BUTTON_RIGHTSTICK },
+                { "LeftShoulder", SDL_CONTROLLER_BUTTON_LEFTSHOULDER },
+                { "RightShoulder", SDL_CONTROLLER_BUTTON_RIGHTSHOULDER },
+                { "Up", SDL_CONTROLLER_BUTTON_DPAD_UP },
+                { "Down", SDL_CONTROLLER_BUTTON_DPAD_DOWN },
+                { "Left", SDL_CONTROLLER_BUTTON_DPAD_LEFT },
+                { "Right", SDL_CONTROLLER_BUTTON_DPAD_RIGHT }
+            };
+
+            auto mapIt = buttonMap.find(button);
+            if (mapIt == buttonMap.end())
+            {
+                SDL_LogError(0, "ParseMappingFile invalid controller button: %s\n",
+                                button.c_str());
+                return false;
+            }
+
+            // add the action name and button to the map
+            mCtrlActionMap[action] = mapIt->second;
+        }
+        else
+        {
+            SDL_LogError(0, "ParseMappingFile invalid device: %s\n",
+                         device.c_str());
+            return false;
+        }
+
+    }
+
+    return true;
+}
+
+ButtonState InputSystem::GetMappedButtonState(const std::string& actionName) const
+{
+    ButtonState retState = ENone;
+
+    // check controller
+    {
+        auto mapIt = mCtrlActionMap.find(actionName);
+        if (mapIt != mCtrlActionMap.end())
+        {
+            SDL_GameControllerButton btn = mapIt->second;
+            // TODO - support multiple controllers
+            if (mControllers[0] != nullptr &&
+                mState.Controllers[0].mIsConnected)
+            {
+                retState = mState.Controllers[0].GetButtonState(btn);
+                if (retState != ENone)
+                {
+                    return retState;
+                }
+            }
+        }
+    }
+    // check mouse
+    {
+        auto mapIt = mMouseActionMap.find(actionName);
+        if (mapIt != mMouseActionMap.end())
+        {
+            int btn = mapIt->second;
+            retState = mState.Mouse.GetButtonState(btn);
+            if (retState != ENone)
+            {
+                return retState;
+            }
+        }
+    }
+    // check keyboard
+    {
+        auto mapIt = mKeyboardActionMap.find(actionName);
+        if (mapIt != mKeyboardActionMap.end())
+        {
+            SDL_Scancode btn = mapIt->second;
+            retState = mState.Keyboard.GetKeyState(btn);
+            if (retState != ENone)
+            {
+                return retState;
+            }
+        }
+    }
+
+    // none found
+    return retState;
 }
 
 float InputSystem::Filter1D(int input)

@@ -36,10 +36,10 @@ void Ship::UpdateActor(float deltaTime)
 	SetRotation(angle);
 }
 
-void Ship::ActorInput(const InputState& state)
+void Ship::ActorInput(const InputSystem& input)
 {
-	if (state.Controllers[0].GetRightTrigger() > 0.25f
-		&& mLaserCooldown <= 0.0f)
+	if (input.GetMappedButtonState("Fire") == EHeld
+        && mLaserCooldown <= 0.0f)
 	{
 		// Create a laser and set its position/rotation to mine
 		Laser* laser = new Laser(GetGame());
@@ -50,12 +50,12 @@ void Ship::ActorInput(const InputState& state)
 		mLaserCooldown = 0.25f;
 	}
 
-	if (state.Controllers[0].GetIsConnected())
+	if (input.GetState().Controllers[0].GetIsConnected())
 	{
-		mVelocityDir = state.Controllers[0].GetLeftStick();
-		if (!Math::NearZero(state.Controllers[0].GetRightStick().Length()))
+		mVelocityDir = input.GetState().Controllers[0].GetLeftStick();
+		if (!Math::NearZero(input.GetState().Controllers[0].GetRightStick().Length()))
 		{
-			mRotationDir = state.Controllers[0].GetRightStick();
+			mRotationDir = input.GetState().Controllers[0].GetRightStick();
 		}
 	}
 }

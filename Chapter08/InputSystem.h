@@ -7,6 +7,7 @@
 // ----------------------------------------------------------------
 
 #pragma once
+#include <map>
 #include <SDL2/SDL_scancode.h>
 #include <SDL2/SDL_gamecontroller.h>
 #include <SDL2/SDL_mouse.h>
@@ -118,9 +119,23 @@ public:
 	const InputState& GetState() const { return mState; }
 
 	void SetRelativeMouseMode(bool value);
+
+    // Exercise 8.2 - event mapping file config
+    // returns true on success, false on fail
+    bool ParseMappingFile(const std::string& fileName);
+    // Exercise 8.2
+    // returns state of parsed button for given action;
+    // checks all input types (controller, mouse, keyboard)
+    ButtonState GetMappedButtonState(const std::string& actionName) const;
 private:
 	float Filter1D(int input);
 	Vector2 Filter2D(int inputX, int inputY);
 	InputState mState;
 	SDL_GameController* mControllers[ControllerState::MAX_CONTROLLERS];
+
+    // Configured button mappings for actions
+    std::map<std::string, SDL_GameControllerButton> mCtrlActionMap;
+    std::map<std::string, int> mMouseActionMap;
+    std::map<std::string, SDL_Scancode> mKeyboardActionMap;
 };
+

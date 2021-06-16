@@ -62,7 +62,8 @@ bool Game::Initialize()
 
 	// Initialize input system
 	mInputSystem = new InputSystem();
-	if (!mInputSystem->Initialize())
+	if (!mInputSystem->Initialize() ||
+        !mInputSystem->ParseMappingFile("Cfg/Input.cfg"))
 	{
 		SDL_Log("Failed to initialize input system");
 		return false;
@@ -144,7 +145,8 @@ void Game::ProcessInput()
 	mUpdatingActors = true;
 	for (auto actor : mActors)
 	{
-		actor->ProcessInput(state);
+		//actor->ProcessInput(state);
+		actor->ProcessInput(*mInputSystem);
 	}
 	mUpdatingActors = false;
 }

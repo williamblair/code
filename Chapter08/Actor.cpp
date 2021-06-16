@@ -9,6 +9,7 @@
 #include "Actor.h"
 #include "Game.h"
 #include "Component.h"
+#include "InputSystem.h"
 #include <algorithm>
 
 Actor::Actor(Game* game)
@@ -58,21 +59,21 @@ void Actor::UpdateActor(float deltaTime)
 {
 }
 
-void Actor::ProcessInput(const struct InputState& state)
+void Actor::ProcessInput(const InputSystem& input)
 {
 	if (mState == EActive)
 	{
 		// First process input for components
 		for (auto comp : mComponents)
 		{
-			comp->ProcessInput(state);
+			comp->ProcessInput(input.GetState());
 		}
 
-		ActorInput(state);
+		ActorInput(input);
 	}
 }
 
-void Actor::ActorInput(const struct InputState& state)
+void Actor::ActorInput(const InputSystem& input)
 {
 }
 
