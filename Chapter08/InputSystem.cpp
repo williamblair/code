@@ -117,14 +117,34 @@ bool InputSystem::Initialize()
 	mState.Mouse.mCurrButtons = 0;
 	mState.Mouse.mPrevButtons = 0;
 
-	// Get the connected controller, if it exists
-	mController = SDL_GameControllerOpen(0);
-	// Initialize controller state
-	mState.Controller.mIsConnected = (mController != nullptr);
-	memset(mState.Controller.mCurrButtons, 0,
-		SDL_CONTROLLER_BUTTON_MAX);
-	memset(mState.Controller.mPrevButtons, 0,
-		SDL_CONTROLLER_BUTTON_MAX);
+    // Initialize all possible controllers as disconnected
+    for (int i = 0; i < ControllerState::MAX_CONTROLLERS; ++i)
+    {
+        mState.Controllers[i].mIsConnected = false;
+        memset(mState.Controllers[i].mCurrButtons, 0,
+            SDL_CONTROLLER_BUTTON_MAX);
+        memset(mState.Controllers[i].mPrevButtons, 0,
+            SDL_CONTROLLER_BUTTON_MAX);
+
+        mControllers[i] = nullptr;
+    }
+
+	// Get the connected controllers, if it exists
+    int numJoy = SDL_NumJoysticks();
+    SDL_Log("Num joysticks: %d\n", numJoy);
+    for (int i = 0; i < numJoy; ++i)
+    {
+        if (SDL_IsGameController(i))
+        {
+            mControllers[i] = SDL_GameControllerOpen(i);
+            mState.Controllers[i].mIsConnected = (mControllers[i] != nullptr);
+        }
+        else
+        {
+            SDL_LogWarn(0,"Controller %d not a game controller, skipping\n",
+                          i);
+        }
+    }
 
 	return true;
 }
@@ -147,9 +167,16 @@ void InputSystem::PrepareForUpdate()
 	mState.Mouse.mScrollWheel = Vector2::Zero;
 
 	// Controller
-	memcpy(mState.Controller.mPrevButtons,
-		mState.Controller.mCurrButtons,
-		SDL_CONTROLLER_BUTTON_MAX);
+    for (int i = 0; i < ControllerState::MAX_CONTROLLERS; ++i)
+    {
+        if (mControllers[i] != nullptr &&
+            mState.Controllers[i].mIsConnected)
+        {
+    	    memcpy(mState.Controllers[i].mPrevButtons,
+        		mState.Controllers[i].mCurrButtons,
+        		SDL_CONTROLLER_BUTTON_MAX);
+        }
+    }
 }
 
 void InputSystem::Update()
@@ -172,33 +199,44 @@ void InputSystem::Update()
 
 	// Controller
 	// Buttons
-	for (int i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++)
-	{
-		mState.Controller.mCurrButtons[i] =
-			SDL_GameControllerGetButton(mController, 
-				SDL_GameControllerButton(i));
-	}
+    for (int ctrl = 0; ctrl < ControllerState::MAX_CONTROLLERS; ++ctrl)
+    {
+        // don't check disconnected controllers
+        if (mControllers[ctrl] == nullptr ||
+            !mState.Controllers[ctrl].mIsConnected)
+        {
+            continue;
+        }
+        
+        for (int i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++)
+        {
+            mState.Controllers[ctrl].mCurrButtons[i] =
+                SDL_GameControllerGetButton(mControllers[ctrl], 
+                    SDL_GameControllerButton(i));
+        }
+        
+        // Triggers
+        mState.Controllers[ctrl].mLeftTrigger =
+            Filter1D(SDL_GameControllerGetAxis(mControllers[ctrl],
+                SDL_CONTROLLER_AXIS_TRIGGERLEFT));
+        mState.Controllers[ctrl].mRightTrigger =
+            Filter1D(SDL_GameControllerGetAxis(mControllers[ctrl],
+                SDL_CONTROLLER_AXIS_TRIGGERRIGHT));
 
-	// Triggers
-	mState.Controller.mLeftTrigger =
-		Filter1D(SDL_GameControllerGetAxis(mController,
-			SDL_CONTROLLER_AXIS_TRIGGERLEFT));
-	mState.Controller.mRightTrigger =
-		Filter1D(SDL_GameControllerGetAxis(mController,
-			SDL_CONTROLLER_AXIS_TRIGGERRIGHT));
+        // Sticks
+        x = SDL_GameControllerGetAxis(mControllers[ctrl],
+            SDL_CONTROLLER_AXIS_LEFTX);
+        y = -SDL_GameControllerGetAxis(mControllers[ctrl],
+            SDL_CONTROLLER_AXIS_LEFTY);
+        mState.Controllers[ctrl].mLeftStick = Filter2D(x, y);
 
-	// Sticks
-	x = SDL_GameControllerGetAxis(mController,
-		SDL_CONTROLLER_AXIS_LEFTX);
-	y = -SDL_GameControllerGetAxis(mController,
-		SDL_CONTROLLER_AXIS_LEFTY);
-	mState.Controller.mLeftStick = Filter2D(x, y);
+        x = SDL_GameControllerGetAxis(mControllers[ctrl],
+            SDL_CONTROLLER_AXIS_RIGHTX);
+        y = -SDL_GameControllerGetAxis(mControllers[ctrl],
+            SDL_CONTROLLER_AXIS_RIGHTY);
+        mState.Controllers[ctrl].mRightStick = Filter2D(x, y);
+    }
 
-	x = SDL_GameControllerGetAxis(mController,
-		SDL_CONTROLLER_AXIS_RIGHTX);
-	y = -SDL_GameControllerGetAxis(mController,
-		SDL_CONTROLLER_AXIS_RIGHTY);
-	mState.Controller.mRightStick = Filter2D(x, y);
 }
 
 void InputSystem::ProcessEvent(SDL_Event& event)

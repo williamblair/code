@@ -38,7 +38,7 @@ void Ship::UpdateActor(float deltaTime)
 
 void Ship::ActorInput(const InputState& state)
 {
-	if (state.Controller.GetRightTrigger() > 0.25f
+	if (state.Controllers[0].GetRightTrigger() > 0.25f
 		&& mLaserCooldown <= 0.0f)
 	{
 		// Create a laser and set its position/rotation to mine
@@ -50,12 +50,12 @@ void Ship::ActorInput(const InputState& state)
 		mLaserCooldown = 0.25f;
 	}
 
-	if (state.Controller.GetIsConnected())
+	if (state.Controllers[0].GetIsConnected())
 	{
-		mVelocityDir = state.Controller.GetLeftStick();
-		if (!Math::NearZero(state.Controller.GetRightStick().Length()))
+		mVelocityDir = state.Controllers[0].GetLeftStick();
+		if (!Math::NearZero(state.Controllers[0].GetRightStick().Length()))
 		{
-			mRotationDir = state.Controller.GetRightStick();
+			mRotationDir = state.Controllers[0].GetRightStick();
 		}
 	}
 }

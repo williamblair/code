@@ -67,6 +67,8 @@ class ControllerState
 {
 public:
 	friend class InputSystem;
+    
+    enum { MAX_CONTROLLERS = 4 };
 
 	// For buttons
 	bool GetButtonValue(SDL_GameControllerButton button) const;
@@ -97,7 +99,7 @@ struct InputState
 {
 	KeyboardState Keyboard;
 	MouseState Mouse;
-	ControllerState Controller;
+	ControllerState Controllers[ControllerState::MAX_CONTROLLERS];
 };
 
 class InputSystem
@@ -120,5 +122,5 @@ private:
 	float Filter1D(int input);
 	Vector2 Filter2D(int inputX, int inputY);
 	InputState mState;
-	SDL_GameController* mController;
+	SDL_GameController* mControllers[ControllerState::MAX_CONTROLLERS];
 };
