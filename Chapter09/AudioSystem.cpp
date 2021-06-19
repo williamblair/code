@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------
 
 #include "AudioSystem.h"
-#include <SDL/SDL_log.h>
+#include <SDL2/SDL_log.h>
 #include <fmod_studio.hpp>
 #include <fmod_errors.h>
 #include <vector>
