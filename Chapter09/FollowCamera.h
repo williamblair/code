@@ -22,6 +22,14 @@ public:
 	void SetVertDist(float dist) { mVertDist = dist; }
 	void SetTargetDist(float dist) { mTargetDist = dist; }
 	void SetSpringConstant(float spring) { mSpringConstant = spring; }
+	
+	
+	// Exercise 9.1 - add pitch/yaw offset when right mouse
+	float GetPitchSpeed() const { return mPitchSpeed; }
+	float GetYawSpeed() const { return mYawSpeed; }
+	void SetPitchSpeed(float pitch) { mPitchSpeed = pitch; }
+	void SetYawSpeed(float yaw) { mYawSpeed = yaw; }
+	
 private:
 	Vector3 ComputeCameraPos() const;
 
@@ -37,4 +45,12 @@ private:
 	float mTargetDist;
 	// Spring constant (higher is more stiff)
 	float mSpringConstant;
+	
+	// Exercise 9.1 - add pitch/yaw offset when holding right mouse
+	// Up vector of camera
+	Vector3 mUp;
+	// Rotation of pitch
+	float mPitchSpeed;
+	// Rotation of yaw
+	float mYawSpeed;
 };

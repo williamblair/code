@@ -15,6 +15,9 @@ FollowCamera::FollowCamera(Actor* owner)
 	,mVertDist(150.0f)
 	,mTargetDist(100.0f)
 	,mSpringConstant(64.0f)
+	,mUp(Vector3::UnitZ)
+	,mPitchSpeed(0.0f)
+	,mYawSpeed(0.0f)
 {
 }
 
@@ -34,12 +37,36 @@ void FollowCamera::Update(float deltaTime)
 	mVelocity += acel * deltaTime;
 	// Update actual camera position
 	mActualPos += mVelocity * deltaTime;
+	
+	// Ideal Up (technically doesn't spring like above)
+	Vector3 idealUp = Vector3::UnitZ;
+	diff = mUp - idealUp;
+	mUp -= diff * deltaTime;
+	
+	// Create a quaternion for yaw about world up
+	Quaternion yaw(Vector3::UnitZ, mYawSpeed * deltaTime);
+	// Transform actual pos by yaw
+	mActualPos = Vector3::Transform(mActualPos, yaw);
+
 	// Target is target dist in front of owning actor
 	Vector3 target = mOwner->GetPosition() +
 		mOwner->GetForward() * mTargetDist;
+	
+	// Calculate camera forward (from current pos to target pos)
+	// then right from that
+	Vector3 forward = target - mActualPos;
+	forward.Normalize();
+	Vector3 right = Vector3::Cross(mUp, forward);
+	right.Normalize();
+	
+	// Create quaternion for pitch about camera right
+	Quaternion pitch(right, mPitchSpeed * deltaTime);
+	// Transform camera offset and up by pitch
+	mActualPos = Vector3::Transform(mActualPos, pitch);
+	mUp = Vector3::Transform(mUp, pitch);
+
 	// Use actual position here, not ideal
-	Matrix4 view = Matrix4::CreateLookAt(mActualPos, target,
-		Vector3::UnitZ);
+	Matrix4 view = Matrix4::CreateLookAt(mActualPos, target, mUp);
 	SetViewMatrix(view);
 }
 
