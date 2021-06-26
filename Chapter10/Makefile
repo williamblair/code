@@ -5,7 +5,7 @@
 #   Ubuntu 20.04.2 LTS
 CC = g++
 TARGET = main
-CFLAGS = `pkg-config --cflags sdl2`
+CFLAGS = -g `pkg-config --cflags sdl2`
 BUILDDIR = ./build
 OBJS = $(BUILDDIR)/Main.o \
        $(BUILDDIR)/Game.o \

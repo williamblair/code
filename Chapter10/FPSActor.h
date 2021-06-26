@@ -34,4 +34,12 @@ private:
 	class Actor* mFPSModel;
 	SoundEvent mFootstep;
 	float mLastFootstep;
+
+    enum class State
+    {
+        Walking = 0,
+        Jumping,
+        Falling
+    };
+    State mState;
 };

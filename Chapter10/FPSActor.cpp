@@ -41,6 +41,8 @@ FPSActor::FPSActor(Game* game)
 		Vector3(25.0f, 25.0f, 87.5f));
 	mBoxComp->SetObjectBox(myBox);
 	mBoxComp->SetShouldRotate(false);
+
+    mState = State::Walking;
 }
 
 void FPSActor::UpdateActor(float deltaTime)
@@ -95,6 +97,19 @@ void FPSActor::ActorInput(const uint8_t* keys)
 	{
 		strafeSpeed += 400.0f;
 	}
+
+    // Jumping
+    if (keys[SDL_SCANCODE_SPACE] && mState == State::Walking)
+    {
+        float jumpSpeed = 400.0f;
+        mMoveComp->SetJumpSpeed(jumpSpeed);
+        mState = State::Jumping;
+        mMoveComp->SetShouldApplyGravity(true);
+    }
+    if (mMoveComp->GetJumpSpeed() < 0.0f)
+    {
+        mState = State::Falling;
+    }
 
 	mMoveComp->SetForwardSpeed(forwardSpeed);
 	mMoveComp->SetStrafeSpeed(strafeSpeed);
@@ -208,6 +223,12 @@ void FPSActor::FixCollisions()
 			else
 			{
 				pos.z += dz;
+                if (mState == State::Falling)
+                {
+                    mMoveComp->SetJumpSpeed(0.0f);
+                    mMoveComp->SetShouldApplyGravity(false);
+                    mState = State::Walking;
+                }
 			}
 
 			// Need to set position and update box component
