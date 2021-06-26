@@ -44,5 +44,8 @@ public:
 	void RemoveBox(class BoxComponent* box);
 private:
 	class Game* mGame;
-	std::vector<class BoxComponent*> mBoxes;
+    // box pointers sorted by the corresponding axis
+	std::vector<class BoxComponent*> mXBoxes;
+    std::vector<class BoxComponent*> mYBoxes;
+    std::vector<class BoxComponent*> mZBoxes;
 };
