@@ -20,8 +20,8 @@
 #include "TargetActor.h"
 #include "BallActor.h"
 #include "PauseMenu.h"
-#include <SDL/SDL.h>
-#include <SDL/SDL_ttf.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include "Font.h"
 #include <fstream>
 #include <sstream>

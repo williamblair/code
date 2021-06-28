@@ -8,7 +8,7 @@
 
 #include "FPSActor.h"
 #include "MoveComponent.h"
-#include "SDL/SDL_scancode.h"
+#include <SDL2/SDL_scancode.h>
 #include "Renderer.h"
 #include "AudioSystem.h"
 #include "Game.h"

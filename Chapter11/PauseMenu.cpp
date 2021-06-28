@@ -9,7 +9,7 @@
 #include "PauseMenu.h"
 #include "Game.h"
 #include "DialogBox.h"
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 
 PauseMenu::PauseMenu(Game* game)
 	:UIScreen(game)
