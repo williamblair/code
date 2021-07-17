@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include "Math.h"
 
 struct DirectionalLight

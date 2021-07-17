@@ -10,7 +10,7 @@
 #include <fstream>
 #include <sstream>
 #include <rapidjson/document.h>
-#include <SDL/SDL_log.h>
+#include <SDL2/SDL_log.h>
 #include "MatrixPalette.h"
 
 bool Skeleton::Load(const std::string& fileName)

@@ -12,7 +12,7 @@
 #include <vector>
 #include "Math.h"
 #include "SoundEvent.h"
-#include <SDL/SDL_types.h>
+#include <SDL2/SDL_types.h>
 
 class Game
 {
