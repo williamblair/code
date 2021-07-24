@@ -8,6 +8,7 @@
 
 #pragma once
 #include "Component.h"
+#include "Math.h"
 #include <cstddef>
 
 class MeshComponent : public Component
@@ -16,7 +17,7 @@ public:
 	MeshComponent(class Actor* owner, bool isSkeletal = false);
 	~MeshComponent();
 	// Draw this mesh component
-	virtual void Draw(class Shader* shader);
+	virtual void Draw(class Shader* shader, Matrix4& viewProjMat);
 	// Set the mesh/texture index used by mesh component
 	virtual void SetMesh(class Mesh* mesh) { mMesh = mesh; }
 	void SetTextureIndex(size_t index) { mTextureIndex = index; }

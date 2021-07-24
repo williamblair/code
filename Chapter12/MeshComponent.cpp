@@ -30,7 +30,7 @@ MeshComponent::~MeshComponent()
 	mOwner->GetGame()->GetRenderer()->RemoveMeshComp(this);
 }
 
-void MeshComponent::Draw(Shader* shader)
+void MeshComponent::Draw(Shader* shader, Matrix4& viewProjMat)
 {
 	if (mMesh)
 	{

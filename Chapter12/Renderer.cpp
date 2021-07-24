@@ -121,6 +121,8 @@ void Renderer::UnloadData()
 
 void Renderer::Draw()
 {
+    Matrix4 viewProj;
+    
 	// Set the clear color to light grey
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	// Clear the color buffer
@@ -130,31 +132,35 @@ void Renderer::Draw()
 	// Enable depth buffering/disable alpha blend
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
+
+    // calculate view-projection matrix
+    viewProj = mView * mProjection;
+
 	// Set the mesh shader active
 	mMeshShader->SetActive();
 	// Update view-projection matrix
-	mMeshShader->SetMatrixUniform("uViewProj", mView * mProjection);
+	mMeshShader->SetMatrixUniform("uViewProj", viewProj);
 	// Update lighting uniforms
 	SetLightUniforms(mMeshShader);
 	for (auto mc : mMeshComps)
 	{
 		if (mc->GetVisible())
 		{
-			mc->Draw(mMeshShader);
+			mc->Draw(mMeshShader, viewProj);
 		}
 	}
 
 	// Draw any skinned meshes now
 	mSkinnedShader->SetActive();
 	// Update view-projection matrix
-	mSkinnedShader->SetMatrixUniform("uViewProj", mView * mProjection);
+	mSkinnedShader->SetMatrixUniform("uViewProj", viewProj);
 	// Update lighting uniforms
 	SetLightUniforms(mSkinnedShader);
 	for (auto sk : mSkeletalMeshes)
 	{
 		if (sk->GetVisible())
 		{
-			sk->Draw(mSkinnedShader);
+			sk->Draw(mSkinnedShader, viewProj);
 		}
 	}
 
